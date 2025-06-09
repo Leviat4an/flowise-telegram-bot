@@ -30,7 +30,7 @@ def webhook():
         text = update['message'].get('text', '').strip()
 
         if text.startswith("/start"):
-            reply_text = "Добро пожаловать! Я Telegram-бот, подключённый к Flowise. Напиши что-нибудь."
+            reply_text = "Добро пожаловать! Я Telegram-бот, подключённый к Flowise. Напиши>
         elif text.startswith("/help"):
             reply_text = "Список команд:\n/start — запуск\n/help — помощь"
         else:
@@ -65,8 +65,3 @@ def generate_flowise_response(user_input):
             return "Ошибка при обращении к Flowise."
     except Exception as e:
         return f"Ошибка: {e}"
-
-if __name__ == '__main__':
-    set_webhook()
-    app.run(host='0.0.0.0', port=PORT)
-
