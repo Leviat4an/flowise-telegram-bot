@@ -4,7 +4,7 @@ import requests
 
 app = Flask(__name__)
 
-TOKEN = os.environ.get('TELEGRAM_TOKEN')
+TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 PORT = int(os.environ.get('PORT', 5000))
 WEBHOOK_URL = os.environ.get('WEBHOOK_URL')  # твой публичный URL на Render + /webhook
 
