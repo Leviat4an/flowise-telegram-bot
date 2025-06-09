@@ -1,8 +1,2 @@
-<<<<<<< HEAD
-python-telegram-bot==20.3
-openai
-=======
 flask
 requests
-
->>>>>>> f4cb5e8 (Добавлен бот с webhook на Flask и requerements)
