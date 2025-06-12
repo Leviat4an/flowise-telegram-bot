@@ -31,7 +31,7 @@ def webhook():
         message = update['message']
         chat_id = message['chat']['id']
 
-        # Текстовое сообщение
+        # Обработка текстовых сообщений
         if 'text' in message:
             text = message['text']
 
@@ -48,14 +48,32 @@ def webhook():
                 reply = ask_flowise(text)
                 send_message(chat_id, reply)
 
-        # Загруженный документ
+        # Обработка загруженного документа
         elif 'document' in message:
             file_id = message['document']['file_id']
             filename = message['document']['file_name']
             download_document(file_id, filename)
             send_message(chat_id, f"Файл {filename} загружен успешно.")
 
+    elif 'callback_query' in update:
+        handle_callback(update['callback_query'])
+
     return {'ok': True}
+
+def handle_callback(callback):
+    chat_id = callback["message"]["chat"]["id"]
+    data = callback["data"]
+
+    if data == "jkh":
+        send_message(chat_id, "Вы выбрали категорию: ЖКХ.")
+    elif data == "fines":
+        send_message(chat_id, "Вы выбрали категорию: Штрафы.")
+    elif data == "gosuslugi":
+        send_message(chat_id, "Вы выбрали категорию: Госуслуги.")
+
+    # Уведомление Telegram, что callback обработан
+    callback_id = callback["id"]
+    requests.post(f"{TELEGRAM_API_URL}/answerCallbackQuery", json={"callback_query_id": callback_id})
 
 def generate_pdf(text, chat_id):
     pdf = FPDF()
@@ -87,9 +105,9 @@ def send_message(chat_id, text):
 def send_main_buttons(chat_id):
     keyboard = {
         "inline_keyboard": [
-            [{"text": " M-  ЖКХ", "callback_data": "jkh"}],
-            [{"text": " ~T Штрафы", "callback_data": "fines"}],
-            [{"text": " ~B Госуслуги", "callback_data": "gosuslugi"}]
+            [{"text": "🏢 ЖКХ", "callback_data": "jkh"}],
+            [{"text": "💸 Штрафы", "callback_data": "fines"}],
+            [{"text": "📑 Госуслуги", "callback_data": "gosuslugi"}]
         ]
     }
     url = f"{TELEGRAM_API_URL}/sendMessage"
@@ -101,5 +119,13 @@ def send_main_buttons(chat_id):
     requests.post(url, json=payload)
 
 def ask_flowise(text):
-    response = requests.post(FLOWISE_API_URL, json={"question": text})
-    return response.json().get("text", "Нет ответа от Flowise.")
+    try:
+        response = requests.post(FLOWISE_API_URL, json={"question": text})
+        return response.json().get("text", "Ответ не получен от Flowise.")
+    except Exception as e:
+        return f"Ошибка при обращении к Flowise: {e}"
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    set_webhook()
+    app.run(host="0.0.0.0", port=port)
